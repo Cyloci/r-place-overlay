@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <script>
+      const TEMPLATE = "./template.png";
+
+      const tempCanvas = document.createElement("canvas");
+      const tempCtx = tempCanvas.getContext("2d");
+
+      const img = new Image();
+      img.src = "./template.png";
+      img.onload = () => {
+        tempCanvas.width = img.width;
+        tempCanvas.height = img.height;
+        tempCtx.drawImage(img, 0, 0);
+        console.log(tempCanvas, img.width);
+        const imageData = tempCtx.getImageData(0, 0, img.width, img.height);
+
+        const dithered = new ImageData(
+          imageData.width * 3,
+          imageData.height * 3
+        );
+        for (let y = 0; y < imageData.height; ++y) {
+          for (let x = 0; x < imageData.width; ++x) {
+            const imageDataPx = (y * imageData.width + x) * 4;
+            const tgtPx = ((y * 3 + 1) * dithered.width + (x * 3 + 1)) * 4;
+            dithered.data[tgtPx] = imageData.data[imageDataPx];
+            dithered.data[tgtPx + 1] = imageData.data[imageDataPx + 1];
+            dithered.data[tgtPx + 2] = imageData.data[imageDataPx + 2];
+            dithered.data[tgtPx + 3] = imageData.data[imageDataPx + 3];
+          }
+        }
+
+        const canvas = document.getElementById("canvas");
+        canvas.width = dithered.width;
+        canvas.height = dithered.height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.putImageData(dithered, 0, 0);
+      };
+    </script>
+  </body>
+</html>
